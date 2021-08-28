@@ -1,28 +1,26 @@
-import os
-import django_heroku
-import dj_database_url
-import environ
 
-env = environ.Env(
-    # set casting, default value
-    DEBUG=(bool, False),
-    USE_HTTPS=(bool, False)
-)
+
+import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+
+# Quick-start development settings - unsuitable for production
+# See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = '%ymny-!plsi=7pq)lqqwh-8+(q9(33z-4ut_d4uw(*o2^syadc'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('DEBUG')
+DEBUG = True
 
-ALLOWED_HOSTS = ['track-your-employees.herokuapp.com', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = []
+
 
 # Application definition
+
+
 INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -39,6 +37,13 @@ INSTALLED_APPS = [
     'frontend'
 ]
 
+
+
+ASGI_APPLICATION = "ETWeb.routing.channel_routing"
+
+
+
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -49,14 +54,31 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+
+PROJECT_INVITATION_AGE = 86400
+
+AUTH_USER_MODEL = 'accounts.User'
+# Key to use when setting/obtaining authorization token cookie. Check out 'accounts.api.views.LoginView'
+AUTH_TOKEN_KEY = 'authtoken'
+
+# age of the auth token cookie in seconds
+# 8 hours
+DEFAULT_AUTH_TOKEN_COOKIE_AGE = 28800
+# 5 days
+
+
+
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
+
+
 ROOT_URLCONF = 'ETWeb.urls'
+
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -69,28 +91,17 @@ TEMPLATES = [
     },
 ]
 
-ASGI_APPLICATION = "ETWeb.routing.channel_routing"
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [env('REDIS_URL', default='redis://localhost:6379')],
-        },
-    },
-}
-
-# Database
-# https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 DATABASES = {
-    # DATABASE_URL will be read from environment variables
-    # postgres://USER:PASSWORD@HOST:PORT/NAME
-    'default': env.db()
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
 }
 
 
 # Password validation
-# https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
+# https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -107,38 +118,13 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-        'rest_framework.permissions.IsAdminUser',
-    ],
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'accounts.authentication.SafeTokenAuthentication'
-    ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 9,
-}
-# time in seconds how long the invitation is actual
-# PROJECT_INVITATION_AGE = 5
-PROJECT_INVITATION_AGE = 86400
-
-AUTH_USER_MODEL = 'accounts.User'
-# Key to use when setting/obtaining authorization token cookie. Check out 'accounts.api.views.LoginView'
-AUTH_TOKEN_KEY = 'authtoken'
-
-# age of the auth token cookie in seconds
-# 8 hours
-DEFAULT_AUTH_TOKEN_COOKIE_AGE = 28800
-# 5 days
-EXTENDED_AUTH_TOKEN_COOKIE_AGE = 432000
-
-SIGNED_COOKIE_SALT = env('SIGNED_COOKIE_SALT')
 
 # Internationalization
-# https://docs.djangoproject.com/en/3.0/topics/i18n/
+# https://docs.djangoproject.com/en/2.0/topics/i18n/
+
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Sao_Paulo'
 
 USE_I18N = True
 
@@ -146,33 +132,14 @@ USE_L10N = True
 
 USE_TZ = True
 
-USE_HTTPS = env('USE_HTTPS')
-SECURE_SSL_REDIRECT = USE_HTTPS
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-CSRF_COOKIE_HTTPONLY = True
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/2.0/howto/static-files/
+
+
+STATIC_URL = '/static/'
+
+
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-# prefix for using staticfiles
-STATIC_URL = '/static/'
-
-# folder where collectstatic puts all the static files from STATICFILES_DIRS
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-
-# App Common Information
-SITE_SHORT_NAME = 'track-your-employees'
-APP_EMAIL_FROM = env('EMAIL_HOST_USER')
-BASE_URL = 'track-your-employees.herokuapp.com'
-
-# Email settings
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_USE_TLS = True
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = env('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
-EMAIL_PORT = 587
-
-
-django_heroku.settings(locals(), databases=False, allowed_hosts=False, secret_key=False)
